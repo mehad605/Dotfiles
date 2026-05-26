@@ -1,0 +1,50 @@
+#!/bin/bash
+
+log() {
+    echo "$1" | systemd-cat -t game-auto-gpu
+}
+
+verify_var() {
+    local var_name="$1"
+    local expected="$2"
+    local actual
+    actual=$(printenv "$var_name" 2>/dev/null)
+    if [ "$actual" = "$expected" ]; then
+        log "  [OK] $var_name is set to: $actual"
+    else
+        log "  [FAIL] $var_name — expected: '$expected', got: '${actual:-<not set>}'"
+    fi
+}
+
+# Detect mode
+MODE=$(envycontrol --query 2>/dev/null)
+if [ -z "$MODE" ]; then
+    log "[ERROR] Could not detect GPU mode — envycontrol returned nothing"
+    exit 1
+fi
+log "Detected GPU mode: $MODE"
+
+if [ "$MODE" = "hybrid" ]; then
+    log "--- Applying hybrid mode settings ---"
+
+    export __NV_PRIME_RENDER_OFFLOAD=1
+    verify_var "__NV_PRIME_RENDER_OFFLOAD" "1"
+
+    export __GLX_VENDOR_LIBRARY_NAME=nvidia
+    verify_var "__GLX_VENDOR_LIBRARY_NAME" "nvidia"
+
+    export PROTON_ENABLE_NVAPI=1
+    verify_var "PROTON_ENABLE_NVAPI" "1"
+
+elif [ "$MODE" = "integrated" ]; then
+    log "--- Applying integrated mode settings ---"
+
+    export PROTON_ENABLE_NVAPI=0
+    verify_var "PROTON_ENABLE_NVAPI" "0"
+
+else
+    log "[WARN] Unknown mode '$MODE' — running with no GPU overrides"
+fi
+
+log "Handing off to: game-performance $*"
+exec game-performance "$@"

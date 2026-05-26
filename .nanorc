@@ -1,0 +1,28 @@
+## --- Visuals ---
+set linenumbers           # Shows line numbers
+set indicator             # Shows a scrollbar-like indicator
+set titlecolor white,blue
+set statuscolor white,cyan
+set numbercolor yellow
+set selectedcolor white,magenta
+
+## --- Behavior & Editing ---
+set mouse                 # Enables mouse clicking and scrolling
+set autoindent            # Matches indentation of the previous line
+set tabsize 4
+set tabstospaces
+set softwrap
+set zap
+set atblanks
+
+## --- Modern Options (Fixed Names) ---
+set smarthome             # Home key goes to first non-space character
+set noconvert             # Don't convert files from DOS/Mac format
+set cutfromcursor         # Cut from cursor to end of line
+
+## --- Syntax Highlighting ---
+include "/usr/share/nano/*.nanorc"
+include "/usr/share/nano-syntax-highlighting/*.nanorc"
+
+## --- Position Tracking ---
+set positionlog           # Remembers your last cursor position

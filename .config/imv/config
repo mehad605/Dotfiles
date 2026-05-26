@@ -1,0 +1,42 @@
+[options]
+# Visuals
+background = 1e1e2e
+overlay = false
+overlay_font = Monospace:12
+
+# Behavior
+# 'shrink' scales large images down to fit the window, but leaves small ones alone
+scaling_mode = shrink
+# Loop back to the first image when reaching the end of a folder
+loop_input = true
+
+[binds]
+# --- Basic App Controls ---
+q = quit
+f = fullscreen
+d = overlay
+t = slideshow +1
+
+# --- Navigation ---
+<Right> = next
+<Left> = prev
+<space> = next
+
+# --- Zooming ---
+<Up> = zoom 1
+<Down> = zoom -1
++ = zoom 1
+- = zoom -1
+c = center
+s = scaling_next
+
+# --- Panning (Vim-style) ---
+h = pan -1 0
+j = pan 0 1
+k = pan 0 -1
+l = pan 1 0
+
+# --- COSMIC Wallpaper Integration ---
+# Press 'w' to instantly set the currently viewed image as your desktop background
+
+w = exec ~/.config/imv/set-bg.sh "$imv_current_file"

@@ -1,0 +1,33 @@
+# ====================
+# Sensitive / Personal
+# ====================
+.bash_history
+.zsh_history
+.viminfo
+.nano-backups
+.flutter
+.wget-hsts
+
+# ====================
+# Password Manager
+# ====================
+.config/keepassxc/
+
+# ====================
+# Clipboard History
+# ====================
+.config/copyq/copyq_tab_*.dat
+
+# ====================
+# System-specific paths
+# ====================
+.config/gtk-3.0/bookmarks
+.config/devtype/config.conf
+.config/cosmic/com.system76.CosmicBackground/v1/all
+
+# ====================
+# Logs / Cache / State
+# ====================
+.config/cachyos/cachyos-hello/
+*.log
+

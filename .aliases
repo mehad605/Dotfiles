@@ -1,0 +1,14 @@
+# -------------------------------
+# Aliases
+# -------------------------------
+alias ls='ls --color'
+alias vim='nvim'
+alias c='clear'
+alias cat='bat'
+alias touchpad-off='sudo systemctl start touchpad-toggle.service'
+alias touchpad-on='sudo systemctl stop touchpad-toggle.service'
+alias integrated='sudo envycontrol -s integrated && reboot'
+alias hybrid='sudo envycontrol -s hybrid && reboot'
+alias turbo-off='echo "1" | sudo tee /sys/devices/system/cpu/intel_pstate/no_turbo'
+alias turbo-on='echo "0" | sudo tee /sys/devices/system/cpu/intel_pstate/no_turbo'
+alias turbo='if [ $(cat /sys/devices/system/cpu/intel_pstate/no_turbo) -eq 0 ]; then echo "Turbo is ON"; else echo "Turbo is OFF"; fi'

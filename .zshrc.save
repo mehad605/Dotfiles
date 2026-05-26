@@ -1,0 +1,159 @@
+# -------------------------------
+# Powerlevel10k Instant Prompt
+# -------------------------------
+typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet  # keeps prompt fast, suppresses warnings
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+
+# -------------------------------
+# Zinit setup
+# -------------------------------
+ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
+if [ ! -d "$ZINIT_HOME" ]; then
+   mkdir -p "$(dirname $ZINIT_HOME)"
+   git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
+fi
+source "${ZINIT_HOME}/zinit.zsh"
+
+# -------------------------------
+# Powerlevel10k and plugins
+# -------------------------------
+zinit ice depth=1; zinit light romkatv/powerlevel10k
+
+# zsh plugins
+zinit light zsh-users/zsh-syntax-highlighting
+zinit light zsh-users/zsh-completions
+zinit light zsh-users/zsh-autosuggestions
+zinit light Aloxaf/fzf-tab
+
+# snippets
+zinit snippet OMZL::git.zsh
+zinit snippet OMZP::git
+zinit snippet OMZP::sudo
+zinit snippet OMZP::archlinux
+zinit snippet OMZP::aws
+zinit snippet OMZP::docker
+zinit snippet OMZP::uv
+zinit snippet OMZP::kubectl
+zinit snippet OMZP::kubectx
+zinit snippet OMZP::command-not-found
+
+# completion
+autoload -Uz compinit && compinit
+autoload -Uz history-search-end
+zinit cdreplay -q
+
+# Powerlevel10k config
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+# -------------------------------
+# Keybindings
+# -------------------------------
+#bindkey '^[[A' history-search-backward
+#bindkey '^[[B' history-search-forward
+#bindkey '^I' autosuggest-accept
+#bindkey '^[w' kill-region
+
+# Keybindings
+#bindkey '^I' autosuggest-accept
+bindkey '^p' history-search-backward
+bindkey '^n' history-search-forward
+bindkey '^[w' kill-region
+bindkey ' ' magic-space
+# -------------------------------
+# History
+# -------------------------------
+HISTSIZE=5000
+HISTFILE=~/.zsh_history
+SAVEHIST=$HISTSIZE
+HISTDUP=erase
+setopt appendhistory
+setopt sharehistory
+setopt hist_ignore_space
+setopt hist_ignore_all_dups
+setopt hist_save_no_dups
+setopt hist_ignore_dups
+setopt hist_find_no_dups
+
+# -------------------------------
+# Completion styling
+# -------------------------------
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+zstyle ':completion:*' menu no
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
+zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
+
+
+
+# =============================================================================
+# ENVIRONMENT VARIABLES & PATH
+# =============================================================================
+export EDITOR=vim
+export TERMINAL=kitty
+
+# Base system paths
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:~/.local/bin
+# User specific paths
+export PATH="$HOME/.local/bin:$PATH"
+# export PATH="/home/maruf/.opencode/bin:$PATH"
+# export PATH="/home/maruf/.kilo/bin:$PATH"
+export PATH="$HOME/.cargo/bin:$PATH"
+
+# NVM Configuration
+export NVM_DIR="$HOME/.nvm"
+source /usr/share/nvm/init-nvm.sh
+
+
+# Android SDK Config
+
+export ANDROID_HOME=$HOME/Android/Sdk
+export PATH=$PATH:$ANDROID_HOME/emulator
+export PATH=$PATH:$ANDROID_HOME/platform-tools
+export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
+export PATH=$PATH:$ANDROID_HOME/build-tools
+
+# -------------------------------
+# Defer fzf and zoxide initialization after startup
+# -------------------------------
+autoload -Uz add-zsh-hook
+
+function init_after_startup() {
+  # fzf initialization
+  if command -v fzf >/dev/null 2>&1; then
+    # macOS/Homebrew path
+    if command -v brew >/dev/null 2>&1 && [ -f "$(brew --prefix)/opt/fzf/shell/completion.zsh" ]; then
+      source "$(brew --prefix)/opt/fzf/shell/completion.zsh"
+    fi
+
+    # fallback for Linux: check if fzf completion exists somewhere
+    if [ -f "/usr/share/fzf/completion.zsh" ]; then
+      source "/usr/share/fzf/completion.zsh"
+    fi
+  fi
+
+  # zoxide initialization
+  if command -v zoxide >/dev/null 2>&1; then
+    eval "$(zoxide init zsh --cmd cd)"
+  fi
+}
+
+remove() {
+  if [ -z "$1" ]; then
+    echo "Usage: remove appname"
+    return 1
+  fi
+
+  APP="$1"
+  sudo apt remove --purge -y "$APP"
+  pkill "$APP" 2>/dev/null
+  rm -rf ~/.config/"$APP" ~/.cache/"$APP" ~/.local/share/"$APP" ~/.config/autostart/org."$APP"."$APP".desktop
+  echo "$APP removed with config cleaned."
+}
+
+add-zsh-hook precmd init_after_startup
+
+# Load personal aliases
+source ~/.aliases

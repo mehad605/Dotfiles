@@ -1,0 +1,15 @@
+[Unit]
+Description=COSMIC Wallpaper Portal Backend
+PartOf=graphical-session.target
+Before=xdg-desktop-portal.service
+Requires=dbus.service
+After=dbus.service
+
+[Service]
+Type=dbus
+BusName=org.freedesktop.impl.portal.desktop.cosmic-wallpaper
+ExecStart=/home/maruf/.local/bin/cosmic-wallpaper-portal
+Slice=session.slice
+
+[Install]
+WantedBy=graphical-session.target

@@ -1,0 +1,57 @@
+{
+    (
+        modifiers: [
+            Super,
+        ],
+        key: "f",
+    ): Spawn("nautilus"),
+    (
+        modifiers: [
+            Super,
+        ],
+        key: "Print",
+        description: Some("Flameshot Monitor"),
+    ): Spawn("/home/maruf/.config/flameshot/monitor_screenshot.sh"),
+    (
+        modifiers: [
+            Super,
+        ],
+        key: "m",
+    ): Minimize,
+    (
+        modifiers: [],
+        key: "Print",
+        description: Some("Flameshot Area"),
+    ): Spawn("env XDG_CURRENT_DESKTOP=Sway flameshot gui"),
+    (
+        modifiers: [
+            Super,
+            Ctrl,
+            Alt,
+        ],
+        key: "Right",
+        description: Some("KeyboardRGB-next"),
+    ): Spawn("asusctl aura effect --next-mode"),
+    (
+        modifiers: [
+            Super,
+            Ctrl,
+            Alt,
+        ],
+        key: "Left",
+        description: Some("keyboardRGB-previous"),
+    ): Spawn("asusctl aura effect --prev-mode"),
+    (
+        modifiers: [
+            Super,
+        ],
+        key: "v",
+        description: Some("Clipboard"),
+    ): Spawn("sh -c \"$HOME/.config/rofi/cliphist-rofi.sh\""),
+    (
+        modifiers: [
+            Super,
+        ],
+        key: "Return",
+    ): Maximize,
+}

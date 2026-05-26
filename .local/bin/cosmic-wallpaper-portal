@@ -1,0 +1,126 @@
+#!/usr/bin/env python3
+
+import os
+import sys
+import urllib.parse
+import gi
+gi.require_version("GLib", "2.0")
+gi.require_version("Gio", "2.0")
+from gi.repository import GLib, Gio
+
+BUS_NAME = "org.freedesktop.impl.portal.desktop.cosmic-wallpaper"
+OBJECT_PATH = "/org/freedesktop/portal/desktop"
+IFACE_NAME = "org.freedesktop.impl.portal.Wallpaper"
+
+CONFIG_FILE = os.path.expanduser("~/.config/cosmic/com.system76.CosmicBackground/v1/all")
+
+
+def set_cosmic_wallpaper(file_path):
+    os.makedirs(os.path.dirname(CONFIG_FILE), exist_ok=True)
+    escaped = file_path.replace("\\", "\\\\").replace('"', '\\"')
+    content = (
+        '(\n'
+        '    output: "all",\n'
+        f'    source: Path("{escaped}"),\n'
+        '    filter_by_theme: false,\n'
+        '    rotation_frequency: 300,\n'
+        '    filter_method: Lanczos,\n'
+        '    scaling_mode: Zoom,\n'
+        '    sampling_method: Alphanumeric,\n'
+        ')\n'
+    )
+    with open(CONFIG_FILE, "w") as f:
+        f.write(content)
+
+
+class WallpaperPortal:
+    def __init__(self):
+        self.connection = Gio.bus_get_sync(Gio.BusType.SESSION)
+
+    def do_set_wallpaper_uri(self, handle, app_id, parent_window, uri, options):
+        parsed = urllib.parse.urlparse(uri)
+        file_path = urllib.parse.unquote(parsed.path)
+        set_cosmic_wallpaper(file_path)
+        return (0,)  # 0 = success
+
+    def do_set_wallpaper_file(self, handle, app_id, parent_window, fd, options):
+        path = fd.get_path() if hasattr(fd, "get_path") else None
+        if path:
+            set_cosmic_wallpaper(path)
+        return (0,)
+
+    def on_method_call(self, connection, sender, object_path, interface_name, method_name, parameters, invocation):
+        try:
+            if method_name == "SetWallpaperURI":
+                handle, app_id, parent_window, uri, options = parameters.unpack()
+                result = self.do_set_wallpaper_uri(handle, app_id, parent_window, uri, options)
+                invocation.return_value(GLib.Variant("(u)", result))
+            elif method_name == "SetWallpaperFile":
+                handle, app_id, parent_window, fd, options = parameters.unpack()
+                result = self.do_set_wallpaper_file(handle, app_id, parent_window, fd, options)
+                invocation.return_value(GLib.Variant("(u)", result))
+            else:
+                invocation.return_dbus_error(
+                    "org.freedesktop.DBus.Error.UnknownMethod",
+                    f"Unknown method: {method_name}",
+                )
+        except Exception as e:
+            print(f"Error in {method_name}: {e}", file=sys.stderr)
+            invocation.return_dbus_error(
+                "org.freedesktop.DBus.Error.Failed",
+                str(e),
+            )
+
+    def on_get_property(self, connection, sender, object_path, interface_name, property_name):
+        if property_name == "version":
+            return GLib.Variant("u", 1)
+        return None
+
+    def run(self):
+        owner_id = Gio.bus_own_name_on_connection(
+            self.connection,
+            BUS_NAME,
+            Gio.BusNameOwnerFlags.NONE,
+            None,
+            None,
+        )
+        iface = IFACE_NAME
+        introspection_xml = (
+            '<node>'
+            f'  <interface name="{iface}">'
+            '    <method name="SetWallpaperURI">'
+            '      <arg type="o" name="handle" direction="in" />'
+            '      <arg type="s" name="app_id" direction="in" />'
+            '      <arg type="s" name="parent_window" direction="in" />'
+            '      <arg type="s" name="uri" direction="in" />'
+            '      <arg type="a' + '{sv}' + '" name="options" direction="in" />'
+            '      <arg type="u" name="response" direction="out" />'
+            '    </method>'
+            '    <method name="SetWallpaperFile">'
+            '      <arg type="o" name="handle" direction="in" />'
+            '      <arg type="s" name="app_id" direction="in" />'
+            '      <arg type="s" name="parent_window" direction="in" />'
+            '      <arg type="h" name="fd" direction="in" />'
+            '      <arg type="a' + '{sv}' + '" name="options" direction="in" />'
+            '      <arg type="u" name="response" direction="out" />'
+            '    </method>'
+            '    <property name="version" type="u" access="read" />'
+            '  </interface>'
+            '</node>'
+        )
+
+        node_info = Gio.DBusNodeInfo.new_for_xml(introspection_xml)
+        registration_id = self.connection.register_object(
+            OBJECT_PATH,
+            node_info.interfaces[0],
+            self.on_method_call,
+            self.on_get_property,
+            None,
+        )
+        loop = GLib.MainLoop()
+        loop.run()
+
+
+if __name__ == "__main__":
+    portal = WallpaperPortal()
+    portal.run()

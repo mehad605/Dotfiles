@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=Cliphist Image
+Exec=wl-paste --type image --watch cliphist store -max-items 200
+Terminal=false

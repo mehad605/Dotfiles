@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=Cliphist Text
+Exec=wl-paste --type text --watch cliphist store -max-items 200
+Terminal=false
