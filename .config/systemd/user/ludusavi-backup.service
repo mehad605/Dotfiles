@@ -1,0 +1,10 @@
+[Unit]
+Description=Automated Daily Ludusavi Save Backup
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/ludusavi backup --force
+
+[Install]
+WantedBy=default.target

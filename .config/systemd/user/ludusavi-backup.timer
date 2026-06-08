@@ -1,0 +1,10 @@
+[Unit]
+Description=Trigger Ludusavi Daily Backup
+
+[Timer]
+OnCalendar=daily
+Persistent=true
+Unit=ludusavi-backup.service
+
+[Install]
+WantedBy=timers.target

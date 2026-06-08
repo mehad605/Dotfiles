@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Motrix
+Exec=motrix --hidden
+Terminal=false
+Icon=motrix
+Categories=Network;DownloadManager;
+Comment=Download Manager started minimized on launch

@@ -199,3 +199,7 @@ export PATH=$PATH:$(go env GOPATH)/bin
 export NVM_DIR="$HOME/.nvm"
 [ -s "/usr/share/nvm/init-nvm.sh" ] && source "/usr/share/nvm/init-nvm.sh"
 setopt interactive_comments
+
+
+# Added by Antigravity CLI installer
+export PATH="/home/maruf/.local/bin:$PATH"
