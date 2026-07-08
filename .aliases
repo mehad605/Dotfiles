@@ -15,3 +15,4 @@ alias turbo-off='echo "[Unit]\nDescription=Disable Intel Turbo Boost\nAfter=mult
 alias turbo-on='echo "0" | sudo tee /sys/devices/system/cpu/intel_pstate/no_turbo && sudo systemctl disable disable-turbo.service'
 
 alias turbo='if [ $(cat /sys/devices/system/cpu/intel_pstate/no_turbo) -eq 0 ]; then echo "Turbo is ON"; else echo "Turbo is OFF"; fi'
+alias cache='ncdu'

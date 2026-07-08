@@ -67,14 +67,16 @@ bindkey ' ' magic-space
 HISTSIZE=5000
 HISTFILE=~/.zsh_history
 SAVEHIST=$HISTSIZE
-HISTDUP=erase
+
+# Core Settings
 setopt appendhistory
-setopt sharehistory
-setopt hist_ignore_space
-setopt hist_ignore_all_dups
-setopt hist_save_no_dups
-setopt hist_ignore_dups
-setopt hist_find_no_dups
+setopt sharehistory          # Shares history across all open terminal windows
+setopt hist_ignore_space     # Backs up your `adb-secure-clear` function trick!
+
+# Deduplication Magic
+setopt hist_ignore_all_dups  # If a new command is a duplicate, delete the old one from history
+setopt hist_save_no_dups     # Never write duplicate commands to the history file on disk
+setopt hist_find_no_dups     # When searching history (Up arrow/Ctrl+R), skip duplicates
 
 # -------------------------------
 # Completion styling
@@ -91,6 +93,7 @@ zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
 # =============================================================================
 export EDITOR=vim
 export TERMINAL=kitty
+export HISTCONTROL=ignorespace
 
 # Base system paths
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:~/.local/bin
@@ -203,3 +206,47 @@ setopt interactive_comments
 
 # Added by Antigravity CLI installer
 export PATH="/home/maruf/.local/bin:$PATH"
+
+# mimocode
+export PATH=/home/maruf/.mimocode/bin:$PATH
+
+
+
+nuke() {
+    # Check if a package name was actually provided
+    if [[ -z "$1" ]]; then
+        echo "❌ Error: You must specify a package name."
+        echo "💡 Usage: nuke <package_name>"
+        return 1
+    fi
+
+    local pkg="$1"
+    echo "🔥 Preparing to completely obliterate: $pkg"
+
+    # Step 1: Remove package, unused dependencies, and global configs
+    echo "📦 Running pacman removal..."
+
+    # We add '|| return 1' so if you press 'n' to abort pacman, the function stops instantly.
+    sudo pacman -Rns "$pkg" || { echo "🛑 Uninstallation aborted. Caches were untouched."; return 1; }
+
+    # Step 2: Clear system pacman cache for the package
+    echo "🧹 Scrubbing system pacman cache..."
+
+    # By adding '-[0-9]*', we force it to look for the version number immediately after the dash.
+    # This prevents 'nuke gcc' from accidentally deleting the cache for 'gcc-libs'.
+    sudo rm -f /var/cache/pacman/pkg/"$pkg"-[0-9]*
+
+    # Step 3: Clear Paru AUR cache (if it exists)
+    if [[ -d "$HOME/.cache/paru/clone/$pkg" ]]; then
+        echo "🧹 Scrubbing paru cache..."
+        rm -rf "$HOME/.cache/paru/clone/$pkg"
+    fi
+
+    # Step 4: Clear Yay AUR cache (if it exists)
+    if [[ -d "$HOME/.cache/yay/$pkg" ]]; then
+        echo "🧹 Scrubbing yay cache..."
+        rm -rf "$HOME/.cache/yay/$pkg"
+    fi
+
+    echo "✅ Done. $pkg and its system/AUR caches have been wiped."
+}

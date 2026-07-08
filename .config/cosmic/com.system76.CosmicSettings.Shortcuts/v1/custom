@@ -54,4 +54,12 @@
         ],
         key: "Return",
     ): Maximize,
+    (
+        modifiers: [
+            Ctrl,
+            Shift,
+        ],
+        key: "space",
+        description: Some("Handy Toggle Dictation"),
+    ): Spawn("handy --toggle-transcription"),
 }
